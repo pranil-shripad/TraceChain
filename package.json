@@ -1,0 +1,29 @@
+{
+  "name": "tracechain",
+  "version": "1.0.0",
+  "description": "TraceChain is a decentralized supply chain tracking application built on the Polygon blockchain, designed to bring transparency and trust to product journeys from manufacturer to end consumer. It uses Solidity smart contracts with role-based access control to record every ownership transfer and status update immutably on-chain, while storing rich product metadata — images, batch details, and specifications — on IPFS via Pinata to keep gas costs minimal. The React frontend connects to users' MetaMask wallets through Ethers.js, allowing manufacturers, distributors, and retailers to create products, update their status in real time, and transfer custody across the supply chain, with every action permanently verifiable on Polygonscan. Built as a full-stack Web3 portfolio project using Hardhat for smart contract development and testing, Polygon Mumbai testnet for free deployment, and Vercel for frontend hosting, TraceChain demonstrates how blockchain technology can eliminate counterfeit goods, reduce fraud, and give consumers a scannable, tamper-proof history of any product they hold.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pranil-shripad/TraceChain.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/pranil-shripad/TraceChain/issues"
+  },
+  "homepage": "https://github.com/pranil-shripad/TraceChain#readme",
+  "devDependencies": {
+    "@types/node": "^22.19.15",
+    "hardhat": "^3.1.12",
+    "typescript": "~5.8.0"
+  }
+}

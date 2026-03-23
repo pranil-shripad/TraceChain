@@ -10,12 +10,22 @@ contract ProductRegistry {
         uint256 createdAt;
 }
 
+address public owner;
 uint256 private _nextId = 1;
 mapping(uint256 => Product) public products;
 
 event ProductCreated(uint256 indexed id, address indexed manufacturer, string name);
 
-function createProduct(string memory name, string memory origin) public returns (uint){
+constructor() {
+    owner = msg.sender;
+}
+
+modifier onlyOwner(){
+    require(msg.sender == owner, "Not the contract owner!");
+    _;
+}
+
+function createProduct(string memory name, string memory origin) public onlyOwner returns (uint){
     uint id = _nextId;
     _nextId++;
 
@@ -30,5 +40,9 @@ function createProduct(string memory name, string memory origin) public returns 
     emit ProductCreated(id, msg.sender, name);
 
     return id;
+}
+function transferOwnership(address newOwner) public onlyOwner {
+    require(newOwner != address(0), "New owner cannot be zero address");
+    owner = newOwner;
 }
 }

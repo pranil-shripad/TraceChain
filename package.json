@@ -16,14 +16,15 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "bugs": {
     "url": "https://github.com/pranil-shripad/TraceChain/issues"
   },
   "homepage": "https://github.com/pranil-shripad/TraceChain#readme",
   "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.2",
     "@types/node": "^22.19.15",
-    "hardhat": "^3.1.12",
+    "ethers": "^6.16.0",
+    "hardhat": "^2.22.3",
     "typescript": "~5.8.0"
   }
 }

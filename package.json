@@ -25,6 +25,7 @@
     "@types/node": "^22.19.15",
     "ethers": "^6.16.0",
     "hardhat": "^2.22.3",
+    "hardhat-gas-reporter": "^2.3.0",
     "typescript": "~5.8.0"
   }
 }

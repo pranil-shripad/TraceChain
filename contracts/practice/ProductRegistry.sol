@@ -45,4 +45,9 @@ function transferOwnership(address newOwner) public onlyOwner {
     require(newOwner != address(0), "New owner cannot be zero address");
     owner = newOwner;
 }
+
+function getProduct(uint id) public view returns (Product memory){
+    require(products[id].id != 0, "Product does not exist");
+    return products[id];
+}
 }

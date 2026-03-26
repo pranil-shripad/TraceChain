@@ -51,8 +51,8 @@ Concepts learned: structs, mappings, events, constructors, modifiers, `msg.sende
 
 1. Clone the repository
 ```bash
-   git clone https://github.com/yourusername/tracechain.git
-   cd tracechain
+   git clone https://github.com/pranil-shripad/TraceChain.git
+   cd TraceChain
 ```
 
 2. Install dependencies

@@ -10,7 +10,9 @@ describe("Supply Chain", function(){
         const SupplyChain = await ethers.getContractFactory("SupplyChain");
         supplyChain = await SupplyChain.deploy();
         await supplyChain.waitForDeployment();
-    })
+    });
+
+    
     it("creates a product and stores correct data", async function () {
         // grant role
         await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
@@ -25,14 +27,19 @@ describe("Supply Chain", function(){
         expect(product.status).to.equal(0);
         expect(product.createdAt).to.be.gt(0);
     });
+
+
     it("emits ProductCreated event", async function () {
     // grant role
     await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
-
     await expect(
-        // call createProduct properly
         supplyChain.connect(manufacturer).createProduct("Qm_testCID_123")
     ).to.emit(supplyChain, "ProductCreated")
     .withArgs(1, manufacturer.address, "Qm_testCID_123");
-});
+    });
+
+    
+    it("reverts if caller is not manufacturer", async function(){
+        await expect(supplyChain.connect(stranger).createProduct("Qm_testCID_123")).to.be.reverted;
+    });
 })

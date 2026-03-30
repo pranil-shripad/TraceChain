@@ -23,6 +23,7 @@ contract SupplyChain is AccessControl {
 
     uint256 private _nextId = 1;
     event ProductCreated(uint256 indexed productId, address indexed manufacturer, string metadataCID);
+    event StatusUpdated(uint256 indexed productId, Status status, string location, address updatedBy);
 
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -44,5 +45,11 @@ contract SupplyChain is AccessControl {
         return productId;
 
 
+    }
+
+    function updateStatus(uint256 productId, Status status, string memory location) external {
+        require(products[productId].currentOwner == msg.sender, "OWNER IS NOT CURRENT OWNER!");
+        products[productId].status = status;
+        emit StatusUpdated(productId, status, location, msg.sender);
     }
 }

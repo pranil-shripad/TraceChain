@@ -48,7 +48,7 @@ contract SupplyChain is AccessControl {
     }
 
     function updateStatus(uint256 productId, Status status, string memory location) external {
-        require(products[productId].currentOwner == msg.sender, "OWNER IS NOT CURRENT OWNER!");
+        require(products[productId].currentOwner == msg.sender, "You are not the owner!");
         products[productId].status = status;
         emit StatusUpdated(productId, status, location, msg.sender);
     }

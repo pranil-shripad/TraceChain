@@ -62,5 +62,25 @@ describe("Supply Chain", function(){
         });
     });
 
+    describe("Transfer Ownership", function(){
+        it("should transfer the ownership correctly", async function(){
+            await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
+            await expect(supplyChain.connect(manufacturer).transferOwnership(1, stranger.address)).to.emit(supplyChain, "OwnershipTransferred").withArgs(1, manufacturer.address, stranger.address);
+            const product = await supplyChain.products(1);
+            expect(product.currentOwner).to.equal(stranger.address);
+        });
+        it("should revert if non-owner tries to transfer", async function(){
+            await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
+            await expect(supplyChain.connect(stranger).transferOwnership(1, stranger.address)).to.be.revertedWith("Only the current owner can transfer this item.");
+        });
+        it("should revert if the new owner is zero address", async function(){
+            await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
+            await expect(supplyChain.connect(manufacturer).transferOwnership(1, ethers.ZeroAddress)).to.be.revertedWith("New owner cannot be zero address");
+        });
+    })
+
     
 })

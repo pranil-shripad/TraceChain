@@ -24,6 +24,7 @@ contract SupplyChain is AccessControl {
     uint256 private _nextId = 1;
     event ProductCreated(uint256 indexed productId, address indexed manufacturer, string metadataCID);
     event StatusUpdated(uint256 indexed productId, Status status, string location, address updatedBy);
+    event OwnershipTransferred(uint256 indexed productId, address oldOwner, address newOwner);
 
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -51,5 +52,13 @@ contract SupplyChain is AccessControl {
         require(products[productId].currentOwner == msg.sender, "You are not the owner!");
         products[productId].status = status;
         emit StatusUpdated(productId, status, location, msg.sender);
+    }
+
+    function transferOwnership(uint256 productId, address newOwner) external{
+        require(products[productId].currentOwner == msg.sender, "Only the current owner can transfer this item.");
+        require(newOwner != address(0), "New owner cannot be zero address");
+        address oldOwner = products[productId].currentOwner;
+        products[productId].currentOwner = newOwner;
+        emit OwnershipTransferred(productId, oldOwner, newOwner);
     }
 }

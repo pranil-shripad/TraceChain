@@ -25,28 +25,31 @@
 
 ### What I want to revisit
  - I want to understand memory vs storage more deeply before Week 2 
- - Understand modifier and cunstructor fully.
+ - Understand modifier and constructor fully.
 
 ---
 
 ## Week 2 — Main Contract + Tests
 
 ### What I built each day
-- **Day 8** —
-- **Day 9** —
-- **Day 10** —
-- **Day 11** —
-- **Day 12** —
-- **Day 13** —
-- **Day 14** —
+- **Day 8** — Hardhat testing basics
+                Learned the structure of a Hardhat test file — describe, it, beforeEach. Wrote your first tests for Counter.sol. Learned how to deploy a contract inside beforeEach so every test gets a fresh instance. Used expect().to.equal() for basic assertions.
+
+- **Day 9** — Testing ProductRegistry, Wrote three tests for ProductRegistry.sol. Also learned that contract.connect(otherAccount) lets you call a function from a different wallet in tests.
+
+- **Day 10** — Gas profiling + Hardhat Console
+Added hardhat-gas-reporter to see how much gas each function costs. Learned that storage writes are expensive and reading is cheap. Opened the Hardhat console and interacted with a deployed contract manually by typing commands — like a REPL for your blockchain.
+
+- **Day 11** — Designed the data model. Created DESIGN.md — the blueprint for SupplyChain.sol
+- **Day 12** — Scaffolded SupplyChain.sol Set up the main contract skeleton
+- **Day 13** — Implemented createProduct() Wrote the first real function in SupplyChain.sol
+- **Day 14** — Implemented updateStatus() + tests, Wrote the second function updateStatus()
 
 ### Hardest concept this week
-
-
-### What clicked for me
-
+- Writing hardhat tests
 
 ### What I want to revisit
+- Learn how does contract.connect work.
 
 ---
 

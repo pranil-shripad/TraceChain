@@ -14,11 +14,8 @@ describe("Supply Chain", function(){
 
     describe("Create Product", function () {
         it("creates a product and stores correct data", async function () {
-        // grant role
         await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
-        // call function
         await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
-        // check values
         const product = await supplyChain.products(1);
         expect (product.productId).to.equal(1);
         expect (product.metadataCID).to.equal("Qm_testCID_123");
@@ -80,7 +77,30 @@ describe("Supply Chain", function(){
             await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
             await expect(supplyChain.connect(manufacturer).transferOwnership(1, ethers.ZeroAddress)).to.be.revertedWith("New owner cannot be zero address");
         });
-    })
+    });
+
+    describe("Get History", function(){
+        it("should record history when product is created", async function(){
+            await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
+            const history = await supplyChain.getHistory(1);
+            expect(history.length).to.equal(1);
+            expect(history[0].newStatus).to.equal(0);
+            expect(history[0].location).to.equal("Origin");
+            expect(history[0].updatedBy).to.equal(manufacturer.address);
+        });
+
+        it("should increment the length of history mapping when status is updated", async function(){
+            await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
+            await supplyChain.connect(manufacturer).updateStatus(1, 2, "Mumbai");
+            const history = await supplyChain.getHistory(1);
+            expect(history.length).to.equal(2);
+            expect(history[1].newStatus).to.equal(2);
+            expect(history[1].location).to.equal("Mumbai");
+            expect(history[1].updatedBy).to.equal(manufacturer.address);
+        });
+    });
 
     
 })

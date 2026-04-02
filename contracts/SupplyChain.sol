@@ -19,7 +19,16 @@ contract SupplyChain is AccessControl {
             uint256 createdAt;
             address currentOwner;
     }
+
+    struct StatusUpdate{
+        Status newStatus;
+        address updatedBy;
+        string location;
+        uint256 timestamp;
+    }
+
     mapping(uint256 => Product) public products;
+    mapping(uint256 => StatusUpdate[]) public history;
 
     uint256 private _nextId = 1;
     event ProductCreated(uint256 indexed productId, address indexed manufacturer, string metadataCID);
@@ -42,6 +51,8 @@ contract SupplyChain is AccessControl {
             currentOwner: msg.sender
         });
 
+        history[productId].push(StatusUpdate({newStatus: Status.Created, updatedBy: msg.sender, location: "Origin", timestamp: block.timestamp}));
+
         emit ProductCreated(productId, msg.sender, metadataCID);
         return productId;
 
@@ -51,6 +62,7 @@ contract SupplyChain is AccessControl {
     function updateStatus(uint256 productId, Status status, string memory location) external {
         require(products[productId].currentOwner == msg.sender, "You are not the owner!");
         products[productId].status = status;
+        history[productId].push(StatusUpdate({newStatus: status, updatedBy: msg.sender, location: location, timestamp: block.timestamp}));
         emit StatusUpdated(productId, status, location, msg.sender);
     }
 
@@ -60,5 +72,9 @@ contract SupplyChain is AccessControl {
         address oldOwner = products[productId].currentOwner;
         products[productId].currentOwner = newOwner;
         emit OwnershipTransferred(productId, oldOwner, newOwner);
+    }
+
+    function getHistory(uint256 productId) external view returns (StatusUpdate[] memory){
+        return history[productId];
     }
 }

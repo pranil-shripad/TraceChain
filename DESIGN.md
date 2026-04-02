@@ -11,7 +11,7 @@ Created → Packed → InTransit → Delivered
 
 
 Section 3 — The StatusUpdate struct
-What was the new status? - Status enum (packed / shipped / inTransit / delivered)
+What was the new status? - Status enum (Created / Shipped / InTransit / Delivered / Cancelled)
 Who made the update? - address updatedBy
 Where was the product at that point? - (string - city name)
 When did it happen? - block.timestamp (uint256)

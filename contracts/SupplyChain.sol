@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract SupplyChain is AccessControl {
     bytes32 public constant MANUFACTURER_ROLE = keccak256("MANUFACTURER_ROLE");
-    bytes32 public constant DISTRIBUTER_ROLE = keccak256("DISTRIBUTER_ROLE");
+    bytes32 public constant DISTRIBUTOR_ROLE = keccak256("DISTRIBUTOR_ROLE");
     bytes32 public constant RETAILER_ROLE = keccak256("RETAILER_ROLE");
 
     enum Status { Created, Shipped, InTransit, Delivered, Cancelled }
@@ -60,6 +60,7 @@ contract SupplyChain is AccessControl {
     }
 
     function updateStatus(uint256 productId, Status status, string memory location) external {
+        require(products[productId].productId != 0, "Product does not exist");
         require(products[productId].currentOwner == msg.sender, "You are not the owner!");
         products[productId].status = status;
         history[productId].push(StatusUpdate({newStatus: status, updatedBy: msg.sender, location: location, timestamp: block.timestamp}));

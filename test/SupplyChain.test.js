@@ -1,5 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { isReadable } = require("stream");
 
 describe("Supply Chain", function(){
 
@@ -25,9 +26,19 @@ describe("Supply Chain", function(){
         expect(product.createdAt).to.be.gt(0);
         });
 
+        it("should increment product id on each product creation", async function(){
+            await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
+            await supplyChain.connect(manufacturer).createProduct("Qm_testCID_456");
+            const product1 = await supplyChain.products(1);
+            const product2 = await supplyChain.products(2);
+            expect (product1.productId).to.equal(1);
+            expect (product2.productId).to.equal(2);
+            expect (product2.metadataCID).to.not.equal(product1.metadataCID);
+        });
+
 
         it("emits ProductCreated event", async function () {
-        // grant role
         await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
         await expect(
             supplyChain.connect(manufacturer).createProduct("Qm_testCID_123")
@@ -55,7 +66,11 @@ describe("Supply Chain", function(){
         it("should revert if caller is not the owner", async function () {
             await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
             await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
-            await expect(supplyChain.connect(stranger).updateStatus(1,2,"Pune")).to.be.revertedWith("You are not the owner!");;
+            await expect(supplyChain.connect(stranger).updateStatus(1,2,"Pune")).to.be.revertedWith("You are not the owner!");
+        });
+        
+        it("should revert if the product does not exist", async function(){
+            await expect(supplyChain.connect(stranger).updateStatus(999, 2,"Pune")).to.be.revertedWith("Product does not exist");
         });
     });
 
@@ -99,6 +114,50 @@ describe("Supply Chain", function(){
             expect(history[1].newStatus).to.equal(2);
             expect(history[1].location).to.equal("Mumbai");
             expect(history[1].updatedBy).to.equal(manufacturer.address);
+        });
+    });
+
+    describe("Role Management", function(){
+        it("should grant DISTRIBUTOR_ROLE correctly", async function(){
+            await supplyChain.grantRole(await supplyChain.DISTRIBUTOR_ROLE(), stranger.address);
+            const hasRole = await supplyChain.hasRole(await supplyChain.DISTRIBUTOR_ROLE(), stranger.address);
+            expect(hasRole).to.equal(true);
+        });
+
+        it("should confirm address without role returns false", async function(){
+            const hasRole = await supplyChain.hasRole(await supplyChain.DISTRIBUTOR_ROLE(), stranger.address);
+            expect(hasRole).to.equal(false);
+        });
+    });
+
+    describe("End to End", function(){
+        it("should track a complete product journey through the supply chain", async function(){
+            await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
+
+            let product = await supplyChain.products(1);
+            expect (product.productId).to.equal(1);
+            expect(product.currentOwner).to.equal(manufacturer.address);
+            expect(product.status).to.equal(0);
+            await supplyChain.connect(manufacturer).updateStatus(1, 2, "Mumbai");
+
+            product = await supplyChain.products(1);
+            expect(product.status).to.equal(2);
+            await expect(supplyChain.connect(manufacturer).transferOwnership(1, stranger.address)).to.emit(supplyChain, "OwnershipTransferred").withArgs(1, manufacturer.address, stranger.address);
+
+            product = await supplyChain.products(1);
+            expect(product.currentOwner).to.equal(stranger.address);
+            await supplyChain.connect(stranger).updateStatus(1, 3, "Mumbai");
+
+            product = await supplyChain.products(1);
+            expect(product.status).to.equal(3);
+
+            const history = await supplyChain.getHistory(1);
+            expect(history.length).to.equal(3);
+            expect(history[0].newStatus).to.equal(0);
+            expect(history[1].newStatus).to.equal(2);
+            expect(history[2].newStatus).to.equal(3);
+            expect(history[2].updatedBy).to.equal(stranger.address);
         });
     });
 

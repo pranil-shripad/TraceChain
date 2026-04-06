@@ -56,21 +56,22 @@ Added hardhat-gas-reporter to see how much gas each function costs. Learned that
 ## Week 3 — IPFS Integration + Deploy Scripts
 
 ### What I built each day
-- **Day 15** —
-- **Day 16** —
-- **Day 17** —
-- **Day 18** —
-- **Day 19** —
-- **Day 20** —
-- **Day 21** —
+- **Day 15** — Implemented product ownership transfer and on-chain history tracking
+- **Day 16** — Built a complete end-to-end test suite with edge cases
+- **Day 17** — Created deploy and interaction scripts for local blockchain
+- **Day 18** — Learned IPFS fundamentals and set up Pinata
+- **Day 19** — Built script to upload (pin) metadata to IPFS via API
+- **Day 20** — Integrated IPFS with smart contract (full off-chain + on-chain flow)
+- **Day 21** — Reviewed system and documented full architecture & flow
 
 ### Hardest concept this week
-
-
-### What clicked for me
+Understanding how IPFS and blockchain connect asynchronously—especially how off-chain data (metadata) stays trustworthy using just a CID on-chain.
 
 
 ### What I want to revisit
+- Writing clean, production-level test cases (edge cases + coverage)
+- Deep understanding of IPFS internals (content addressing, pinning, gateways)
+- Structuring scripts for better modularity and reuse
 
 ---
 

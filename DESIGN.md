@@ -50,3 +50,66 @@ Section 6 — ASCII flowchart
      │ updateStatus(id, Delivered, city)  │
      ▼                                    │
 [Delivered] ◄───────────────────────────--┘
+
+### DATA FLOW
+                 ┌──────────────────────────┐
+                 │   Developer / Frontend   │
+                 └────────────┬─────────────┘
+                              │
+                              │ 1. Upload metadata JSON
+                              │    { name, origin, batchId, image }
+                              ▼
+                 ┌──────────────────────────┐
+                 │       Pinata API         │
+                 └────────────┬─────────────┘
+                              │
+                              │ 2. Returns CID (Qm...)
+                              ▼
+                 ┌──────────────────────────┐
+                 │   scripts/interact.js    │
+                 └────────────┬─────────────┘
+                              │
+                              │ 3. createProduct(CID)
+                              ▼
+                 ┌──────────────────────────┐
+                 │   SupplyChain.sol        │
+                 │   (Polygon Mumbai)       │
+                 └────────────┬─────────────┘
+                              │
+                              │ 4. Store on-chain:
+                              │    - productId
+                              │    - metadataCID
+                              │    - owner
+                              │    - status
+                              ▼
+                 ┌──────────────────────────┐
+                 │        Blockchain        │
+                 │   (Immutable Record)     │
+                 └────────────┬─────────────┘
+                              │
+                              │ 5. Read Request: products(id)
+                              ▼
+                 ┌──────────────────────────┐
+                 │   SupplyChain.sol        │
+                 └────────────┬─────────────┘
+                              │
+                              │ 6. Returns:
+                              │    { productId, metadataCID,
+                              │      owner, status }
+                              ▼
+                 ┌──────────────────────────┐
+                 │   Frontend / Script      │
+                 └────────────┬─────────────┘
+                              │
+                              │ 7. Fetch metadata:
+                              │    /ipfs/{CID}
+                              ▼
+                 ┌──────────────────────────┐
+                 │     IPFS (via Pinata)    │
+                 └────────────┬─────────────┘
+                              │
+                              │ 8. Returns full JSON metadata
+                              ▼
+                 ┌──────────────────────────┐
+                 │      Display to User     │
+                 └──────────────────────────┘

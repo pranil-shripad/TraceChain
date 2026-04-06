@@ -79,6 +79,13 @@ npm run dev
 
 ---
 
+
+## How it works ?
+Metadata is stored on IPFS instead of on-chain because blockchains are expensive and inefficient for large data, while IPFS provides a cheaper, scalable way to store files without losing decentralization. A CID (Content Identifier) is like a unique fingerprint of the file—if the content changes even slightly, the CID changes, ensuring data integrity. The frontend uses this flow by first reading the CID from the smart contract, then fetching the actual metadata from IPFS using that CID. This allows the app to display full product details while keeping the blockchain lightweight and secure.
+
+
+---
+
 ## 🗺 Architecture
 ```
 User Browser
@@ -131,3 +138,6 @@ React App (Vercel)
 ## 📝 License
 
 This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
+
+---
+

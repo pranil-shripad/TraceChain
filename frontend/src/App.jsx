@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useWallet } from './hooks/useWallet'
+import useWallet from './hooks/useWallet'
 
 function App() {
   const { account, error, connectWallet } = useWallet();

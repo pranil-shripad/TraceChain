@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import useWallet from './hooks/useWallet'
+import ProductDetail from './components/ProductDetail';
 
 function App() {
   const { account, error, connectWallet } = useWallet();
+  
 
   return (
     <>
@@ -11,6 +13,7 @@ function App() {
         <p>
           Connected: {account.slice(0, 6)}...{account.slice(-4)}
         </p>
+        
       )}
 
       {error && (
@@ -18,6 +21,7 @@ function App() {
           { error }
         </p>
       )}
+      <ProductDetail productId={1} />
     </>
   )
 }

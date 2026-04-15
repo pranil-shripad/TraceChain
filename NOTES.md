@@ -76,3 +76,7 @@ Consensus - Consensus is a mechanism in blockchain which is used to verify trans
 - Q4. What happens to the data if Pinata goes down? (hint: research this — it's an interesting question)
         If Pinata goes down, the data may become unavailable.
         If the data is stored on multiple nodes then the data can be accessible from any other node.
+
+
+
+revise from day 24 upto day 28

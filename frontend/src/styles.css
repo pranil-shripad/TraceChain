@@ -1,0 +1,237 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+/*
+ * TRACECHAIN — NEO-BRUTALIST DESIGN SYSTEM
+ * Flat surfaces, thick black borders, hard offset shadows, high contrast.
+ */
+
+@theme inline {
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-yellow: var(--brand-yellow);
+  --color-purple: var(--brand-purple);
+  --color-blue: var(--brand-blue);
+  --color-green: var(--brand-green);
+  --color-red: var(--brand-red);
+  --color-orange: var(--brand-orange);
+
+  --font-display: "Archivo", "Space Grotesk", system-ui, sans-serif;
+  --font-sans: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+:root {
+  --radius: 0px;
+  --ink: oklch(0.18 0 0);
+  --paper: oklch(0.955 0.014 85);
+  --surface: oklch(1 0 0);
+  --brand-yellow: oklch(0.874 0.166 92);
+  --brand-purple: oklch(0.627 0.233 303.9);
+  --brand-blue: oklch(0.623 0.214 259.8);
+  --brand-green: oklch(0.723 0.192 149.6);
+  --brand-red: oklch(0.65 0.213 26);
+  --brand-orange: oklch(0.73 0.17 50);
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--ink);
+  --muted: oklch(0.93 0.012 85);
+  --muted-foreground: oklch(0.42 0.01 85);
+  --accent: var(--brand-yellow);
+  --accent-foreground: var(--ink);
+  --destructive: var(--brand-red);
+  --destructive-foreground: var(--ink);
+  --border: var(--ink);
+  --input: var(--ink);
+  --ring: var(--brand-purple);
+}
+
+.dark {
+  /* Deep neutral charcoal paper, bright bone ink — keeps accents vivid */
+  --ink: oklch(0.965 0.006 85);
+  --paper: oklch(0.165 0.004 275);
+  --surface: oklch(0.235 0.006 275);
+  --brand-yellow: oklch(0.86 0.17 92);
+  --brand-purple: oklch(0.68 0.21 303.9);
+  --brand-blue: oklch(0.68 0.18 259.8);
+  --brand-green: oklch(0.76 0.19 149.6);
+  --brand-red: oklch(0.68 0.2 26);
+  --brand-orange: oklch(0.76 0.16 60);
+
+  --primary-foreground: oklch(0.165 0.004 275);
+  --muted: oklch(0.29 0.008 275);
+  --muted-foreground: oklch(0.75 0.008 85);
+}
+
+/* Vibrant accent fills always carry dark text in dark mode */
+.dark :is(.bg-yellow, .bg-purple, .bg-blue, .bg-green, .bg-red, .bg-orange, .bg-accent) {
+  color: var(--paper);
+}
+
+/* Large inverted ink slabs (footer, banners) stay dark instead of flipping white */
+.dark :is(footer, section, header).bg-ink {
+  background-color: var(--surface);
+  color: var(--ink);
+}
+
+
+
+
+
+/* ---------- Hard offset shadow utilities ---------- */
+
+@utility brut {
+  box-shadow: 5px 5px 0 var(--ink);
+}
+@utility brut-md {
+  box-shadow: 6px 6px 0 var(--ink);
+}
+@utility brut-lg {
+  box-shadow: 8px 8px 0 var(--ink);
+}
+@utility brut-xl {
+  box-shadow: 10px 10px 0 var(--ink);
+}
+@utility brut-none {
+  box-shadow: 0 0 0 var(--ink);
+}
+
+/* Tactile press behaviour for interactive surfaces */
+@utility press {
+  transition:
+    transform 90ms ease-out,
+    box-shadow 90ms ease-out,
+    background-color 120ms ease-out;
+  box-shadow: 5px 5px 0 var(--ink);
+
+  &:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  &:active {
+    transform: translate(5px, 5px);
+    box-shadow: 0 0 0 var(--ink);
+  }
+  &:disabled {
+    transform: none;
+    box-shadow: 5px 5px 0 var(--ink);
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* Card lift toward its shadow on hover */
+@utility press-card {
+  transition:
+    transform 120ms ease-out,
+    box-shadow 120ms ease-out;
+  box-shadow: 6px 6px 0 var(--ink);
+
+  &:hover {
+    transform: translate(3px, 3px);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+}
+
+@utility label-tech {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+@utility grid-paper {
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--ink) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--ink) 8%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+@utility stripes {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--ink) 0 8px,
+    transparent 8px 16px
+  );
+}
+
+@layer base {
+  * {
+    border-color: var(--ink);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--brand-purple);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--brand-yellow);
+    color: var(--ink);
+  }
+}
+
+@keyframes brut-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@utility skeleton-brut {
+  animation: brut-pulse 1.4s steps(6, end) infinite;
+}

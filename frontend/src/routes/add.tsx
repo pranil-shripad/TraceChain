@@ -14,7 +14,7 @@ import {
 } from "@/components/brutal";
 import { EXPLORER } from "@/lib/trace/config";
 import { pinFile, pinJson } from "@/lib/trace/pinata.functions";
-import { useWallet } from "@/lib/trace/wallet";
+import { getGasOverrides, useWallet } from "@/lib/trace/wallet";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/add")({
@@ -121,7 +121,8 @@ function AddProductPage() {
 
       setStep(2);
       const contract = await getWriteContract();
-      const tx = await contract["createProduct"]!(cid);
+      const overrides = await getGasOverrides();
+      const tx = await contract["createProduct"]!(cid, overrides);
       const receipt = await tx.wait();
 
       setStep(3);

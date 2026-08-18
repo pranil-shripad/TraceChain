@@ -14,7 +14,7 @@ import {
   Select,
 } from "@/components/brutal";
 import { ROLES, ROLE_COLORS, shortAddr, type RoleName } from "@/lib/trace/config";
-import { useWallet } from "@/lib/trace/wallet";
+import { getGasOverrides, useWallet } from "@/lib/trace/wallet";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -55,7 +55,8 @@ function AdminPage() {
     setBusy(true);
     try {
       const contract = await getWriteContract();
-      const tx = await contract["grantRole"]!(roleHash(role), address);
+      const overrides = await getGasOverrides();
+      const tx = await contract["grantRole"]!(roleHash(role), address, overrides);
       await tx.wait();
       setHolders((h) => [
         { address, role },
@@ -74,7 +75,8 @@ function AdminPage() {
     setBusy(true);
     try {
       const contract = await getWriteContract();
-      const tx = await contract["revokeRole"]!(roleHash(holder.role), holder.address);
+      const overrides = await getGasOverrides();
+      const tx = await contract["revokeRole"]!(roleHash(holder.role), holder.address, overrides);
       await tx.wait();
       setHolders((h) =>
         h.filter(

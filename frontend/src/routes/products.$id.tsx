@@ -23,12 +23,13 @@ import {
   STATUS_OPTIONS,
   formatDate,
   getIpfsUrls,
+  getValidNextStatuses,
   ipfsUrl,
   sameAddress,
   type StatusCode,
 } from "@/lib/trace/config";
 import { useHistory, useMetadata, useProduct } from "@/lib/trace/data";
-import { useWallet } from "@/lib/trace/wallet";
+import { getGasOverrides, useWallet } from "@/lib/trace/wallet";
 
 export const Route = createFileRoute("/products/$id")({
   head: ({ params }) => {
@@ -62,7 +63,7 @@ function ProductDetailPage() {
 
   const [qrOpen, setQrOpen] = useState(false);
   const [qrData, setQrData] = useState<string | null>(null);
-  const [status, setStatus] = useState("0");
+  const [status, setStatus] = useState("1");
   const [location, setLocation] = useState("");
   const [newOwner, setNewOwner] = useState("");
   const [busy, setBusy] = useState(false);
@@ -70,6 +71,10 @@ function ProductDetailPage() {
 
   const isOwner = sameAddress(account, product.data?.currentOwner);
   const padded = String(productId).padStart(3, "0");
+
+  const validOptions = product.data
+    ? getValidNextStatuses(product.data.status as StatusCode)
+    : [];
 
   useEffect(() => {
     if (!qrOpen) return;
@@ -80,12 +85,19 @@ function ProductDetailPage() {
     })();
   }, [qrOpen, productId]);
 
+  useEffect(() => {
+    if (validOptions.length > 0 && validOptions[0] && (!status || !validOptions.some((o) => o.value === status))) {
+      setStatus(validOptions[0].value);
+    }
+  }, [validOptions, status]);
+
   const updateStatus = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     try {
       const contract = await getWriteContract();
-      const tx = await contract["updateStatus"]!(productId, Number(status), location);
+      const overrides = await getGasOverrides();
+      const tx = await contract["updateStatus"]!(productId, Number(status), location, overrides);
       await tx.wait();
       toast.success("STATUS UPDATED");
       void product.refetch();
@@ -107,7 +119,8 @@ function ProductDetailPage() {
     setBusy(true);
     try {
       const contract = await getWriteContract();
-      const tx = await contract["transferOwnership"]!(productId, newOwner);
+      const overrides = await getGasOverrides();
+      const tx = await contract["transferOwnership"]!(productId, newOwner, overrides);
       await tx.wait();
       toast.success("OWNERSHIP TRANSFERRED");
       setNewOwner("");
@@ -295,27 +308,40 @@ function ProductDetailPage() {
                   <h3 className="mb-4 font-display text-lg font-extrabold uppercase tracking-tight">
                     UPDATE STATUS
                   </h3>
-                  <form onSubmit={updateStatus} className="space-y-4">
-                    <Field label="NEW STATUS">
-                      <Select value={status} onChange={(e) => setStatus(e.target.value)}>
-                        {STATUS_OPTIONS.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.label}
-                          </option>
-                        ))}
-                      </Select>
-                    </Field>
-                    <Field label="LOCATION">
-                      <Input
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        placeholder="Pune, India"
-                      />
-                    </Field>
-                    <Button type="submit" variant="green" full disabled={busy}>
-                      {busy ? "SUBMITTING..." : "UPDATE STATUS"}
-                    </Button>
-                  </form>
+                  {validOptions.length === 0 ? (
+                    <div className="border-[3px] border-ink bg-paper p-4 text-center">
+                      <p className="font-display text-sm font-extrabold uppercase">
+                        {p.status === 3
+                          ? "DELIVERED — TERMINAL STATE"
+                          : "CANCELLED — TERMINAL STATE"}
+                      </p>
+                      <p className="label-tech mt-1 text-xs opacity-70">
+                        Product status is complete and can no longer be updated.
+                      </p>
+                    </div>
+                  ) : (
+                    <form onSubmit={updateStatus} className="space-y-4">
+                      <Field label="NEW STATUS">
+                        <Select value={status} onChange={(e) => setStatus(e.target.value)}>
+                          {validOptions.map((o) => (
+                            <option key={o.value} value={o.value}>
+                              {o.label}
+                            </option>
+                          ))}
+                        </Select>
+                      </Field>
+                      <Field label="LOCATION">
+                        <Input
+                          value={location}
+                          onChange={(e) => setLocation(e.target.value)}
+                          placeholder="Pune, India"
+                        />
+                      </Field>
+                      <Button type="submit" variant="green" full disabled={busy}>
+                        {busy ? "SUBMITTING..." : "UPDATE STATUS"}
+                      </Button>
+                    </form>
+                  )}
                 </Card>
 
                 <Card className="p-5">

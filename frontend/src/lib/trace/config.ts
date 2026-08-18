@@ -60,6 +60,16 @@ export const STATUS_OPTIONS = (
   [0, 1, 2, 3, 4] as StatusCode[]
 ).map((code) => ({ value: String(code), label: STATUS_LABELS[code] }));
 
+/** Helper to get allowed next status transitions based on current product status. */
+export const getValidNextStatuses = (
+  currentStatus: StatusCode
+): { value: string; label: string }[] => {
+  if (currentStatus === 3 || currentStatus === 4) return [];
+  return ([1, 2, 3, 4] as StatusCode[])
+    .filter((code) => code > currentStatus || code === 4)
+    .map((code) => ({ value: String(code), label: STATUS_LABELS[code] }));
+};
+
 export const ROLES = ["MANUFACTURER", "DISTRIBUTOR", "RETAILER"] as const;
 export type RoleName = (typeof ROLES)[number];
 

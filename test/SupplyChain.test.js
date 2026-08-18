@@ -72,6 +72,32 @@ describe("Supply Chain", function(){
         it("should revert if the product does not exist", async function(){
             await expect(supplyChain.connect(stranger).updateStatus(999, 2,"Pune")).to.be.revertedWith("Product does not exist");
         });
+
+        it("should revert if trying to revert status to Created (0)", async function(){
+            await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
+            await expect(
+                supplyChain.connect(manufacturer).updateStatus(1, 0, "Origin")
+            ).to.be.revertedWith("Cannot revert status to Created");
+        });
+
+        it("should revert if trying to update status of a Delivered product", async function(){
+            await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
+            await supplyChain.connect(manufacturer).updateStatus(1, 3, "Customer Address"); // Delivered (3)
+            await expect(
+                supplyChain.connect(manufacturer).updateStatus(1, 1, "Warehouse")
+            ).to.be.revertedWith("Product is in a terminal state");
+        });
+
+        it("should revert if trying to move backward in status lifecycle", async function(){
+            await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
+            await supplyChain.connect(manufacturer).updateStatus(1, 2, "In Transit Hub"); // InTransit (2)
+            await expect(
+                supplyChain.connect(manufacturer).updateStatus(1, 1, "Shipped Hub")
+            ).to.be.revertedWith("Invalid status transition");
+        });
     });
 
     describe("Transfer Ownership", function(){

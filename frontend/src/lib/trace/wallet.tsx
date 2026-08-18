@@ -59,6 +59,33 @@ export function getReadContract(): Contract {
   return new Contract(CONTRACT_ADDRESS, TRACECHAIN_ABI as unknown as string[], provider);
 }
 
+/** Helper to calculate EIP-1559 gas fee overrides for Polygon Amoy network (min priority fee 30 Gwei). */
+export async function getGasOverrides() {
+  const eth = getEthereum();
+  if (!eth) return {};
+  try {
+    const provider = new BrowserProvider(eth);
+    const feeData = await provider.getFeeData();
+    const minTip = 30_000_000_000n; // 30 Gwei minimum tip required on Polygon Amoy
+    const maxPriorityFeePerGas =
+      feeData.maxPriorityFeePerGas && feeData.maxPriorityFeePerGas > minTip
+        ? feeData.maxPriorityFeePerGas
+        : minTip;
+
+    const maxFeePerGas =
+      feeData.maxFeePerGas && feeData.maxFeePerGas > maxPriorityFeePerGas * 2n
+        ? feeData.maxFeePerGas
+        : maxPriorityFeePerGas * 2n + 10_000_000_000n;
+
+    return { maxPriorityFeePerGas, maxFeePerGas };
+  } catch {
+    return {
+      maxPriorityFeePerGas: 30_000_000_000n, // 30 Gwei
+      maxFeePerGas: 60_000_000_000n, // 60 Gwei
+    };
+  }
+}
+
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<string | null>(null);
   const [chainId, setChainId] = useState<number | null>(null);

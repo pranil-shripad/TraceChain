@@ -62,6 +62,18 @@ contract SupplyChain is AccessControl {
     function updateStatus(uint256 productId, Status status, string memory location) external {
         require(products[productId].productId != 0, "Product does not exist");
         require(products[productId].currentOwner == msg.sender, "You are not the owner!");
+
+        Status currentStatus = products[productId].status;
+        require(
+            currentStatus != Status.Delivered && currentStatus != Status.Cancelled,
+            "Product is in a terminal state"
+        );
+        require(status != Status.Created, "Cannot revert status to Created");
+        require(
+            uint8(status) > uint8(currentStatus) || status == Status.Cancelled,
+            "Invalid status transition"
+        );
+
         products[productId].status = status;
         history[productId].push(StatusUpdate({newStatus: status, updatedBy: msg.sender, location: location, timestamp: block.timestamp}));
         emit StatusUpdated(productId, status, location, msg.sender);

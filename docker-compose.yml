@@ -1,0 +1,15 @@
+services:
+  tracechain-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tracechain-app
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./frontend/.env
+    environment:
+      - PORT=8080
+      - HOST=0.0.0.0
+      - VITE_CONTRACT_ADDRESS=${VITE_CONTRACT_ADDRESS:-0xcc7D54C0f4Ae273CD095f1BCbfC4F5AAc9C4a5e5}
+    restart: unless-stopped

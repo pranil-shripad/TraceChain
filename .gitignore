@@ -16,3 +16,6 @@ coverage.json
 
 # macOS system files
 .DS_Store
+
+# Temporary scripts
+scratch/

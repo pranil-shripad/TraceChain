@@ -7,7 +7,7 @@ export const EXPLORER = "https://amoy.polygonscan.com";
 export const RPC_URL = "https://polygon-amoy-bor-rpc.publicnode.com";
 
 export const CONTRACT_ADDRESS =
-  import.meta.env.VITE_CONTRACT_ADDRESS || "0xcc7D54C0f4Ae273CD095f1BCbfC4F5AAc9C4a5e5";
+  import.meta.env["VITE_CONTRACT_ADDRESS"] || "0xcc7D54C0f4Ae273CD095f1BCbfC4F5AAc9C4a5e5";
 
 export const IPFS_GATEWAYS = [
   "https://gateway.pinata.cloud/ipfs/",

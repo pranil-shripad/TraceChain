@@ -9,10 +9,38 @@ const fileSchema = z.object({
 
 const jsonSchema = z.object({ metadata: z.record(z.string(), z.any()) });
 
+const getJwt = (): string => {
+  return (
+    (typeof import.meta !== "undefined" && import.meta.env?.["VITE_PINATA_JWT"]) ||
+    (typeof import.meta !== "undefined" && import.meta.env?.["PINATA_JWT"]) ||
+    (typeof process !== "undefined" && process.env?.["VITE_PINATA_JWT"]) ||
+    (typeof process !== "undefined" && process.env?.["PINATA_JWT"]) ||
+    ""
+  );
+};
+
+const getApiKey = (): string => {
+  return (
+    (typeof import.meta !== "undefined" && import.meta.env?.["VITE_PINATA_API_KEY"]) ||
+    (typeof import.meta !== "undefined" && import.meta.env?.["PINATA_API_KEY"]) ||
+    (typeof process !== "undefined" && process.env?.["VITE_PINATA_API_KEY"]) ||
+    (typeof process !== "undefined" && process.env?.["PINATA_API_KEY"]) ||
+    ""
+  );
+};
+
+const getApiSecret = (): string => {
+  return (
+    (typeof import.meta !== "undefined" && import.meta.env?.["VITE_PINATA_API_SECRET"]) ||
+    (typeof import.meta !== "undefined" && import.meta.env?.["PINATA_API_SECRET"]) ||
+    (typeof process !== "undefined" && process.env?.["VITE_PINATA_API_SECRET"]) ||
+    (typeof process !== "undefined" && process.env?.["PINATA_API_SECRET"]) ||
+    ""
+  );
+};
+
 const getHeaders = (contentType?: string) => {
-  const jwt =
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_PINATA_JWT) ||
-    (typeof process !== "undefined" ? process.env["PINATA_JWT"] : "");
+  const jwt = getJwt();
 
   const headers: Record<string, string> = {};
   if (contentType) headers["Content-Type"] = contentType;
@@ -22,12 +50,8 @@ const getHeaders = (contentType?: string) => {
     return headers;
   }
 
-  const apiKey =
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_PINATA_API_KEY) ||
-    (typeof process !== "undefined" ? process.env["PINATA_API_KEY"] : "");
-  const apiSecret =
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_PINATA_API_SECRET) ||
-    (typeof process !== "undefined" ? process.env["PINATA_API_SECRET"] : "");
+  const apiKey = getApiKey();
+  const apiSecret = getApiSecret();
 
   if (apiKey && apiSecret && apiKey !== "your_pinata_api_key_here") {
     headers["pinata_api_key"] = apiKey.trim();
@@ -35,12 +59,17 @@ const getHeaders = (contentType?: string) => {
     return headers;
   }
 
+  console.error("Pinata credentials lookup failed. Debug values:", {
+    hasJwt: Boolean(jwt),
+    hasApiKey: Boolean(apiKey),
+    hasApiSecret: Boolean(apiSecret),
+  });
   throw new Error("Pinata IPFS credentials missing in environment variables.");
 };
 
 /** Pin a binary file to IPFS via Pinata. Returns the CID. */
 export const pinFile = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => fileSchema.parse(d))
+  .validator((d: unknown) => fileSchema.parse(d))
   .handler(async ({ data }) => {
     const bytes = Uint8Array.from(atob(data.dataBase64), (c) => c.charCodeAt(0));
     const form = new FormData();
@@ -62,7 +91,7 @@ export const pinFile = createServerFn({ method: "POST" })
 
 /** Pin a metadata JSON document to IPFS via Pinata. Returns the CID. */
 export const pinJson = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => jsonSchema.parse(d))
+  .validator((d: unknown) => jsonSchema.parse(d))
   .handler(async ({ data }) => {
     const res = await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS", {
       method: "POST",

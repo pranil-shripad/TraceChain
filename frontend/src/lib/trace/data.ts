@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { ipfsUrl, type StatusCode } from "./config";
+import { getIpfsUrls, ipfsUrl, type StatusCode } from "./config";
 import { getReadContract } from "./wallet";
 
 type TraceContract = {
@@ -84,9 +84,20 @@ export async function fetchHistory(id: number): Promise<HistoryEntry[]> {
 }
 
 export async function fetchMetadata(cid: string): Promise<Metadata> {
-  const res = await fetch(ipfsUrl(cid));
-  if (!res.ok) throw new Error("METADATA UNAVAILABLE");
-  return (await res.json()) as Metadata;
+  if (!cid) throw new Error("NO CID PROVIDED");
+  const urls = getIpfsUrls(cid);
+
+  for (const url of urls) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        return (await res.json()) as Metadata;
+      }
+    } catch {
+      /* try next IPFS gateway */
+    }
+  }
+  throw new Error("METADATA UNAVAILABLE");
 }
 
 export const useProducts = () =>

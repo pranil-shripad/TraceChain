@@ -9,10 +9,25 @@ export const RPC_URL = "https://polygon-amoy-bor-rpc.publicnode.com";
 export const CONTRACT_ADDRESS =
   import.meta.env.VITE_CONTRACT_ADDRESS || "0xcc7D54C0f4Ae273CD095f1BCbfC4F5AAc9C4a5e5";
 
-export const IPFS_GATEWAY = "https://gateway.pinata.cloud/ipfs/";
+export const IPFS_GATEWAYS = [
+  "https://gateway.pinata.cloud/ipfs/",
+  "https://ipfs.io/ipfs/",
+  "https://cloudflare-ipfs.com/ipfs/",
+  "https://dweb.link/ipfs/",
+];
 
-export const ipfsUrl = (cid: string) =>
-  `${IPFS_GATEWAY}${cid.replace(/^ipfs:\/\//, "")}`;
+export const getIpfsUrls = (cid?: string): string[] => {
+  if (!cid) return [];
+  if (cid.startsWith("http://") || cid.startsWith("https://")) return [cid];
+  const cleanCid = cid.replace(/^ipfs:\/\//, "");
+  return IPFS_GATEWAYS.map((gw) => `${gw}${cleanCid}`);
+};
+
+export const ipfsUrl = (cid?: string) => {
+  if (!cid) return "";
+  const urls = getIpfsUrls(cid);
+  return urls[0] || "";
+};
 
 export const NETWORK_PARAMS = {
   chainId: CHAIN_ID_HEX,

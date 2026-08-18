@@ -22,6 +22,7 @@ import {
   STATUS_LABELS,
   STATUS_OPTIONS,
   formatDate,
+  getIpfsUrls,
   ipfsUrl,
   sameAddress,
   type StatusCode,
@@ -65,6 +66,7 @@ function ProductDetailPage() {
   const [location, setLocation] = useState("");
   const [newOwner, setNewOwner] = useState("");
   const [busy, setBusy] = useState(false);
+  const [imgSrcIndex, setImgSrcIndex] = useState(0);
 
   const isOwner = sameAddress(account, product.data?.currentOwner);
   const padded = String(productId).padStart(3, "0");
@@ -232,9 +234,15 @@ function ProductDetailPage() {
                 {meta.image && (
                   <div className="brut mb-5 border-[4px] border-ink bg-paper p-2">
                     <img
-                      src={ipfsUrl(meta.image)}
+                      src={getIpfsUrls(meta.image)[imgSrcIndex] || ipfsUrl(meta.image)}
                       alt={meta.name ? `${meta.name} product photo` : "Product photo"}
                       className="h-64 w-full border-[3px] border-ink object-cover"
+                      onError={() => {
+                        const urls = getIpfsUrls(meta.image);
+                        if (imgSrcIndex + 1 < urls.length) {
+                          setImgSrcIndex((prev) => prev + 1);
+                        }
+                      }}
                       loading="lazy"
                     />
                   </div>

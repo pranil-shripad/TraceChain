@@ -17,8 +17,8 @@ const getHeaders = (contentType?: string) => {
   const headers: Record<string, string> = {};
   if (contentType) headers["Content-Type"] = contentType;
 
-  if (jwt && jwt !== "your_pinata_jwt_token_here") {
-    headers["Authorization"] = `Bearer ${jwt}`;
+  if (jwt && jwt.trim() !== "" && jwt !== "your_pinata_jwt_token_here") {
+    headers["Authorization"] = `Bearer ${jwt.trim()}`;
     return headers;
   }
 
@@ -29,9 +29,9 @@ const getHeaders = (contentType?: string) => {
     (typeof import.meta !== "undefined" && import.meta.env?.VITE_PINATA_API_SECRET) ||
     (typeof process !== "undefined" ? process.env["PINATA_API_SECRET"] : "");
 
-  if (apiKey && apiSecret) {
-    headers["pinata_api_key"] = apiKey;
-    headers["pinata_secret_api_key"] = apiSecret;
+  if (apiKey && apiSecret && apiKey !== "your_pinata_api_key_here") {
+    headers["pinata_api_key"] = apiKey.trim();
+    headers["pinata_secret_api_key"] = apiSecret.trim();
     return headers;
   }
 
@@ -51,7 +51,11 @@ export const pinFile = createServerFn({ method: "POST" })
       headers: getHeaders(),
       body: form,
     });
-    if (!res.ok) throw new Error(`Pinata image upload failed (${res.status})`);
+    if (!res.ok) {
+      const errDetail = await res.text().catch(() => "");
+      console.error("Pinata image upload error details:", errDetail);
+      throw new Error(`Pinata image upload failed (${res.status}): ${errDetail || res.statusText}`);
+    }
     const json = (await res.json()) as { IpfsHash: string };
     return { cid: json.IpfsHash };
   });
@@ -65,7 +69,11 @@ export const pinJson = createServerFn({ method: "POST" })
       headers: getHeaders("application/json"),
       body: JSON.stringify({ pinataContent: data.metadata }),
     });
-    if (!res.ok) throw new Error(`Pinata metadata upload failed (${res.status})`);
+    if (!res.ok) {
+      const errDetail = await res.text().catch(() => "");
+      console.error("Pinata metadata upload error details:", errDetail);
+      throw new Error(`Pinata metadata upload failed (${res.status}): ${errDetail || res.statusText}`);
+    }
     const json = (await res.json()) as { IpfsHash: string };
     return { cid: json.IpfsHash };
   });

@@ -69,7 +69,7 @@ const App = () => {
                     <button onClick={() => setView("list")} style={{ marginBottom: "16px" }}>
                         ← Back to list
                     </button>
-                    <AddProduct />
+                    <AddProduct account={account} />
                 </div>
             )}
 

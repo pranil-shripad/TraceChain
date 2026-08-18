@@ -1,5 +1,7 @@
 # TraceChain 🔗
 
+[![CI Pipeline](https://github.com/pranil-shripad/TraceChain/actions/workflows/ci.yml/badge.svg)](https://github.com/pranil-shripad/TraceChain/actions/workflows/ci.yml)
+
 A decentralized supply chain tracking application built on the Polygon blockchain. TraceChain records every product ownership transfer and status update immutably on-chain, while storing rich product metadata on IPFS to keep gas costs minimal.
 
 > 🚧 Currently in active development — following an 8-week build plan from zero to deployed DApp.

@@ -5,8 +5,23 @@ import useWallet from "../hooks/useWallet";
 
 const PINATA_API_KEY    = import.meta.env.VITE_PINATA_API_KEY;
 const PINATA_API_SECRET = import.meta.env.VITE_PINATA_API_SECRET;
+const PINATA_JWT        = import.meta.env.VITE_PINATA_JWT;
 
-const AddProduct = () => {
+const getPinataHeaders = (contentType) => {
+    if (PINATA_JWT && PINATA_JWT !== "your_pinata_jwt_token_here") {
+        return {
+            "Content-Type": contentType,
+            Authorization: `Bearer ${PINATA_JWT}`,
+        };
+    }
+    return {
+        "Content-Type": contentType,
+        pinata_api_key: PINATA_API_KEY,
+        pinata_secret_api_key: PINATA_API_SECRET,
+    };
+};
+
+const AddProduct = ({ account: propAccount }) => {
     const [name, setName]             = useState("");
     const [origin, setOrigin]         = useState("");
     const [batchId, setBatchId]       = useState("");
@@ -17,7 +32,8 @@ const AddProduct = () => {
     const [error, setError]           = useState(null);
 
     const { createProduct } = useSupplyChain();
-    const { account } = useWallet();
+    const { account: hookAccount } = useWallet();
+    const account = propAccount || hookAccount;
 
     const uploadImageToIPFS = async (file) => {
         const formData = new FormData();
@@ -26,11 +42,7 @@ const AddProduct = () => {
             "https://api.pinata.cloud/pinning/pinFileToIPFS",
             formData,
             {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                    pinata_api_key: PINATA_API_KEY,
-                    pinata_secret_api_key: PINATA_API_SECRET,
-                },
+                headers: getPinataHeaders("multipart/form-data"),
             }
         );
         return response.data.IpfsHash;
@@ -41,11 +53,7 @@ const AddProduct = () => {
             "https://api.pinata.cloud/pinning/pinJSONToIPFS",
             metadata,
             {
-                headers: {
-                    "Content-Type": "application/json",
-                    pinata_api_key: PINATA_API_KEY,
-                    pinata_secret_api_key: PINATA_API_SECRET,
-                },
+                headers: getPinataHeaders("application/json"),
             }
         );
         return response.data.IpfsHash;
@@ -60,6 +68,14 @@ const AddProduct = () => {
         try {
             if (!account) {
                 setError("Please connect your wallet first");
+                return;
+            }
+
+            const hasKeySecret = PINATA_API_KEY && PINATA_API_SECRET && PINATA_API_KEY !== "your_pinata_api_key_here";
+            const hasJwt = PINATA_JWT && PINATA_JWT !== "your_pinata_jwt_token_here";
+
+            if (!hasKeySecret && !hasJwt) {
+                setError("Pinata API credentials missing. Please add VITE_PINATA_API_KEY and VITE_PINATA_API_SECRET to frontend/.env and restart dev server.");
                 return;
             }
 
@@ -81,13 +97,15 @@ const AddProduct = () => {
 
             const receipt = await createProduct(metadataCID);
 
-            setTxHash(receipt.hash);
+            if (receipt) {
+                setTxHash(receipt.hash || receipt.transactionHash);
 
-            setName("");
-            setOrigin("");
-            setBatchId("");
-            setDescription("");
-            setImage(null);
+                setName("");
+                setOrigin("");
+                setBatchId("");
+                setDescription("");
+                setImage(null);
+            }
 
         } catch (err) {
             setError(err.message || "Something went wrong");
@@ -175,7 +193,7 @@ const AddProduct = () => {
                 <div style={{ marginTop: "16px", color: "green", padding: "10px", border: "1px solid green", borderRadius: "6px" }}>
                     <strong>Product created successfully!</strong><br />
                     
-                        href={`https://mumbai.polygonscan.com/tx/${txHash}`}
+                        href={`https://amoy.polygonscan.com/tx/${txHash}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         View on Polygonscan ↗

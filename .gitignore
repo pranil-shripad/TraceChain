@@ -1,4 +1,18 @@
-node_modules
+# Dependencies
+node_modules/
+
+# Hardhat build artifacts & coverage
+artifacts/
+cache/
+coverage/
+coverage.json
+
+# Environment files
 .env
-artifacts
-cache
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# macOS system files
+.DS_Store

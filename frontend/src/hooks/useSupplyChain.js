@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import ABI from './../abi/SupplyChain.json'
 
-const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 
 const useSupplyChain = () =>{
@@ -50,12 +50,13 @@ const useSupplyChain = () =>{
 
     const createProduct = async (cid) => {
         try{
-            if(!contract) return;
+            if(!contract) throw new Error("Contract is not connected to MetaMask");
             const tx = await contract.createProduct(cid);
             const receipt = await tx.wait();
             return receipt;
         }catch(error){
             setError(error.message);
+            throw error;
         }
     }
 

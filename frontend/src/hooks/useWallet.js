@@ -10,6 +10,15 @@ const useWallet = () => {
             setError("Please install MetaMask");
             return;
         }
+
+        window.ethereum.request({ method: "eth_accounts" })
+            .then((accounts) => {
+                if (accounts && accounts.length > 0) {
+                    setAccount(accounts[0]);
+                }
+            })
+            .catch((err) => console.error("Error checking accounts:", err));
+
         const handleAccountsChanged = (accounts) => {
             setAccount(accounts[0] || null);
         };

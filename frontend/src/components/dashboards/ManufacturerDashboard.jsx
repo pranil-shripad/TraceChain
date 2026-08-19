@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { useWallet } from "../../hooks/useWallet";
 import { useSupplyChain } from "../../hooks/useSupplyChain";
-import AddProductPage from "../../routes/add";
+import { AddProductPage } from "../../routes/add";
 import { STATUS_LABELS, STATUS_COLORS, shortAddr } from "../../lib/trace/config";
 
 export function ManufacturerDashboard() {
@@ -167,10 +167,8 @@ export function ManufacturerDashboard() {
       )}
 
       {activeTab === "create-product" && (
-        <section className="brut-md border-[3px] border-ink bg-[#1A1A2E] p-6 text-paper">
-          <Link to="/add" className="brut border-[3px] border-ink bg-purple px-6 py-3 font-display font-extrabold uppercase text-paper inline-block mb-4">
-            GO TO FULL PRODUCT REGISTRATION FORM ➔
-          </Link>
+        <section className="brut-md border-[3px] border-ink bg-[#1A1A2E] p-6 text-paper space-y-4">
+          <AddProductPage />
         </section>
       )}
     </div>

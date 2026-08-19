@@ -44,7 +44,7 @@ const STEPS = [
 
 type Result = { productId: string; txHash: string };
 
-function AddProductPage() {
+export function AddProductPage() {
   const { account, connect, getWriteContract } = useWallet();
   const fileInput = useRef<HTMLInputElement>(null);
 

@@ -125,9 +125,22 @@ export function AddProductPage() {
       const tx = await contract["createProduct"]!(cid, overrides);
       const receipt = await tx.wait();
 
+      let createdId = "";
+      if (receipt && receipt.logs) {
+        for (const log of receipt.logs) {
+          try {
+            const parsed = contract.interface.parseLog(log);
+            if (parsed && parsed.name === "ProductCreated") {
+              createdId = String(parsed.args["productId"] || parsed.args?.[0]);
+              break;
+            }
+          } catch {}
+        }
+      }
+
       setStep(3);
       setResult({
-        productId: String(receipt?.logs?.length ?? ""),
+        productId: createdId || "SUCCESS",
         txHash: tx.hash as string,
       });
       toast.success("PRODUCT CREATED");

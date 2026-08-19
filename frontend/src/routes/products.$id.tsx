@@ -31,6 +31,8 @@ import {
 import { useHistory, useMetadata, useProduct } from "@/lib/trace/data";
 import { getGasOverrides, useWallet } from "@/lib/trace/wallet";
 
+import { useRole } from "@/hooks/useRole";
+
 export const Route = createFileRoute("/products/$id")({
   head: ({ params }) => {
     const title = `Product #${String(params.id).padStart(3, "0")} — TraceChain`;
@@ -56,6 +58,7 @@ function ProductDetailPage() {
   const { id } = Route.useParams();
   const productId = Number(id);
   const { account, getWriteContract } = useWallet();
+  const { isManufacturer, isDistributor, isRetailer, isAdmin } = useRole();
 
   const product = useProduct(productId);
   const history = useHistory(productId);
@@ -304,45 +307,57 @@ function ProductDetailPage() {
               </div>
             ) : (
               <div className="space-y-6">
-                <Card className="p-5">
-                  <h3 className="mb-4 font-display text-lg font-extrabold uppercase tracking-tight">
-                    UPDATE STATUS
-                  </h3>
-                  {validOptions.length === 0 ? (
-                    <div className="border-[3px] border-ink bg-paper p-4 text-center">
-                      <p className="font-display text-sm font-extrabold uppercase">
-                        {p.status === 3
-                          ? "DELIVERED — TERMINAL STATE"
-                          : "CANCELLED — TERMINAL STATE"}
-                      </p>
-                      <p className="label-tech mt-1 text-xs opacity-70">
-                        Product status is complete and can no longer be updated.
-                      </p>
-                    </div>
-                  ) : (
-                    <form onSubmit={updateStatus} className="space-y-4">
-                      <Field label="NEW STATUS">
-                        <Select value={status} onChange={(e) => setStatus(e.target.value)}>
-                          {validOptions.map((o) => (
-                            <option key={o.value} value={o.value}>
-                              {o.label}
-                            </option>
-                          ))}
-                        </Select>
-                      </Field>
-                      <Field label="LOCATION">
-                        <Input
-                          value={location}
-                          onChange={(e) => setLocation(e.target.value)}
-                          placeholder="Pune, India"
-                        />
-                      </Field>
-                      <Button type="submit" variant="green" full disabled={busy}>
-                        {busy ? "SUBMITTING..." : "UPDATE STATUS"}
-                      </Button>
-                    </form>
-                  )}
-                </Card>
+                {/* UPDATE STATUS — Restricted to DISTRIBUTOR, RETAILER, or ADMIN */}
+                {isManufacturer && !isDistributor && !isRetailer && !isAdmin ? (
+                  <div className="border-[3px] border-ink bg-blue p-5 text-paper">
+                    <h3 className="font-display text-lg font-extrabold uppercase tracking-tight">
+                      MANUFACTURER CUSTODY ACTIVE
+                    </h3>
+                    <p className="label-tech mt-2 text-xs opacity-90 leading-relaxed">
+                      As a Manufacturer, your next step is to <b>TRANSFER OWNERSHIP</b> of this item to a permissioned Distributor. Logistics status updates (In Transit / Delivered) are managed on-chain by Distributors and Retailers.
+                    </p>
+                  </div>
+                ) : (
+                  <Card className="p-5">
+                    <h3 className="mb-4 font-display text-lg font-extrabold uppercase tracking-tight">
+                      UPDATE STATUS
+                    </h3>
+                    {validOptions.length === 0 ? (
+                      <div className="border-[3px] border-ink bg-paper p-4 text-center">
+                        <p className="font-display text-sm font-extrabold uppercase text-ink">
+                          {p.status === 3
+                            ? "DELIVERED — TERMINAL STATE"
+                            : "CANCELLED — TERMINAL STATE"}
+                        </p>
+                        <p className="label-tech mt-1 text-xs opacity-70 text-ink">
+                          Product status is complete and can no longer be updated.
+                        </p>
+                      </div>
+                    ) : (
+                      <form onSubmit={updateStatus} className="space-y-4">
+                        <Field label="NEW STATUS">
+                          <Select value={status} onChange={(e) => setStatus(e.target.value)}>
+                            {validOptions.map((o) => (
+                              <option key={o.value} value={o.value}>
+                                {o.label}
+                              </option>
+                            ))}
+                          </Select>
+                        </Field>
+                        <Field label="LOCATION">
+                          <Input
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
+                            placeholder="Pune, India"
+                          />
+                        </Field>
+                        <Button type="submit" variant="green" full disabled={busy}>
+                          {busy ? "SUBMITTING..." : "UPDATE STATUS"}
+                        </Button>
+                      </form>
+                    )}
+                  </Card>
+                )}
 
                 <Card className="p-5">
                   <h3 className="mb-4 font-display text-lg font-extrabold uppercase tracking-tight">

@@ -53,14 +53,20 @@ describe("Supply Chain", function(){
     });
 
     describe("Update Status", function(){
-        it("should update the product status correctly", async function () {
+        it("should update the product status correctly when caller has DISTRIBUTOR_ROLE", async function () {
             await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.grantRole(await supplyChain.DISTRIBUTOR_ROLE(), manufacturer.address);
             await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
             await supplyChain.connect(manufacturer).updateStatus(1, 2, "Mumbai");
 
             const product = await supplyChain.products(1);
-
             expect(product.status).to.equal(2);
+        });
+
+        it("should revert if manufacturer attempts to update status to InTransit without DISTRIBUTOR_ROLE", async function () {
+            await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
+            await expect(supplyChain.connect(manufacturer).updateStatus(1, 2, "Mumbai")).to.be.revertedWith("Only distributors can update status to Shipped or InTransit");
         });
 
         it("should revert if caller is not the owner", async function () {
@@ -75,6 +81,7 @@ describe("Supply Chain", function(){
 
         it("should revert if trying to revert status to Created (0)", async function(){
             await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.grantRole(await supplyChain.DISTRIBUTOR_ROLE(), manufacturer.address);
             await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
             await expect(
                 supplyChain.connect(manufacturer).updateStatus(1, 0, "Origin")
@@ -83,6 +90,7 @@ describe("Supply Chain", function(){
 
         it("should revert if trying to update status of a Delivered product", async function(){
             await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.grantRole(await supplyChain.RETAILER_ROLE(), manufacturer.address);
             await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
             await supplyChain.connect(manufacturer).updateStatus(1, 3, "Customer Address"); // Delivered (3)
             await expect(
@@ -92,6 +100,7 @@ describe("Supply Chain", function(){
 
         it("should revert if trying to move backward in status lifecycle", async function(){
             await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.grantRole(await supplyChain.DISTRIBUTOR_ROLE(), manufacturer.address);
             await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
             await supplyChain.connect(manufacturer).updateStatus(1, 2, "In Transit Hub"); // InTransit (2)
             await expect(
@@ -133,6 +142,7 @@ describe("Supply Chain", function(){
 
         it("should increment the length of history mapping when status is updated", async function(){
             await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.grantRole(await supplyChain.DISTRIBUTOR_ROLE(), manufacturer.address);
             await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
             await supplyChain.connect(manufacturer).updateStatus(1, 2, "Mumbai");
             const history = await supplyChain.getHistory(1);
@@ -159,6 +169,8 @@ describe("Supply Chain", function(){
     describe("End to End", function(){
         it("should track a complete product journey through the supply chain", async function(){
             await supplyChain.grantRole(await supplyChain.MANUFACTURER_ROLE(), manufacturer.address);
+            await supplyChain.grantRole(await supplyChain.DISTRIBUTOR_ROLE(), manufacturer.address);
+            await supplyChain.grantRole(await supplyChain.RETAILER_ROLE(), stranger.address);
             await supplyChain.connect(manufacturer).createProduct("Qm_testCID_123");
 
             let product = await supplyChain.products(1);

@@ -74,6 +74,18 @@ contract SupplyChain is AccessControl {
             "Invalid status transition"
         );
 
+        if (status == Status.Shipped || status == Status.InTransit) {
+            require(
+                hasRole(DISTRIBUTOR_ROLE, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender),
+                "Only distributors can update status to Shipped or InTransit"
+            );
+        } else if (status == Status.Delivered) {
+            require(
+                hasRole(RETAILER_ROLE, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender),
+                "Only retailers can update status to Delivered"
+            );
+        }
+
         products[productId].status = status;
         history[productId].push(StatusUpdate({newStatus: status, updatedBy: msg.sender, location: location, timestamp: block.timestamp}));
         emit StatusUpdated(productId, status, location, msg.sender);

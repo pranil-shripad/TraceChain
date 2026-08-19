@@ -38,14 +38,18 @@ function WalletButton() {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="brut flex items-center gap-2 border-[3px] border-ink bg-surface px-3 py-2 font-mono text-sm font-bold">
+      <button
+        type="button"
+        onClick={() => void connect()}
+        title="Click to switch connected account in MetaMask"
+        className="brut flex items-center gap-2 border-[3px] border-ink bg-surface px-3 py-2 font-mono text-sm font-bold hover:bg-yellow transition-all cursor-pointer"
+      >
         <span className="size-2.5 border-2 border-ink bg-green" aria-hidden />
         {shortAddr(account)}
-      </span>
+      </button>
       <span className="brut hidden border-[3px] border-ink bg-purple px-3 py-2 font-display text-xs font-extrabold uppercase tracking-widest sm:block">
         {chainId === 80001 ? "MUMBAI" : `CHAIN ${chainId ?? "?"}`}
       </span>
-      <span className="sr-only">Connected to {CHAIN_NAME}</span>
     </div>
   );
 }

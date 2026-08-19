@@ -5,7 +5,7 @@ import { NoRoleDashboard } from "./components/dashboards/NoRoleDashboard";
 import { ManufacturerDashboard } from "./components/dashboards/ManufacturerDashboard";
 import { DistributorDashboard } from "./components/dashboards/DistributorDashboard";
 import { RetailerDashboard } from "./components/dashboards/RetailerDashboard";
-import { AdminDashboard } from "./components/dashboards/AdminDashboard";
+import { AllProductsPage } from "./components/AllProductsPage";
 
 export function App() {
   const { account } = useWallet();
@@ -31,8 +31,10 @@ export function App() {
     );
   }
 
+  // Admin on "/" (PRODUCTS tab) sees the public All Products Ledger.
+  // Dedicated Admin Governance is accessible via the "/admin" navbar tab.
   if (role === "admin") {
-    return <AdminDashboard />;
+    return <AllProductsPage />;
   }
 
   if (role === "manufacturer") {

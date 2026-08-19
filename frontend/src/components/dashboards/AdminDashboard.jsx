@@ -12,7 +12,7 @@ const roleHash = (roleName) => keccak256(toUtf8Bytes(`${roleName.toUpperCase()}_
 
 export function AdminDashboard() {
   const { account } = useWallet();
-  const { contract, getProduct } = useSupplyChain();
+  const { contract, getProduct, getWriteContract } = useSupplyChain();
   const [activeTab, setActiveTab] = useState("roles");
 
   // Tab 1: Role Management states
@@ -127,8 +127,9 @@ export function AdminDashboard() {
       else if (grantRole === "RETAILER") rHash = await contract.RETAILER_ROLE();
       else rHash = roleHash(grantRole);
 
+      const writeContract = await getWriteContract();
       const overrides = await getGasOverrides();
-      const tx = await contract.grantRole(rHash, grantAddress, overrides);
+      const tx = await writeContract.grantRole(rHash, grantAddress, overrides);
       await tx.wait();
       toast.success(`${grantRole} role granted to ${shortAddr(grantAddress, 4)}`);
       setGrantAddress("");
@@ -141,8 +142,9 @@ export function AdminDashboard() {
   // Revoke Role
   const handleRevokeRole = async (holder) => {
     try {
+      const writeContract = await getWriteContract();
       const overrides = await getGasOverrides();
-      const tx = await contract.revokeRole(holder.roleBytes, holder.address, overrides);
+      const tx = await writeContract.revokeRole(holder.roleBytes, holder.address, overrides);
       await tx.wait();
       toast.success(`${holder.role} role revoked from ${shortAddr(holder.address, 4)}`);
       await loadRoles();
@@ -162,8 +164,9 @@ export function AdminDashboard() {
       else if (roleUpper.includes("RETAILER")) rHash = await contract.RETAILER_ROLE();
       else rHash = roleHash(req.requestedRole);
 
+      const writeContract = await getWriteContract();
       const overrides = await getGasOverrides();
-      const tx = await contract.grantRole(rHash, req.walletAddress, overrides);
+      const tx = await writeContract.grantRole(rHash, req.walletAddress, overrides);
       await tx.wait();
 
       await updateRequest(req.id, { status: "approved" });

@@ -8,7 +8,7 @@ import { STATUS_LABELS, STATUS_COLORS, getValidNextStatuses, shortAddr } from ".
 
 export function DistributorDashboard() {
   const { account } = useWallet();
-  const { contract, getProduct } = useSupplyChain();
+  const { contract, getProduct, getWriteContract } = useSupplyChain();
   const [activeTab, setActiveTab] = useState("custody");
   const [custodyProducts, setCustodyProducts] = useState([]);
   const [allTransferredProducts, setAllTransferredProducts] = useState([]);
@@ -79,8 +79,9 @@ export function DistributorDashboard() {
 
     setSubmittingId(productId);
     try {
+      const writeContract = await getWriteContract();
       const overrides = await getGasOverrides();
-      const tx = await contract.updateStatus(
+      const tx = await writeContract.updateStatus(
         productId,
         Number(formData.status),
         formData.location || "Logistics Hub",
@@ -106,8 +107,9 @@ export function DistributorDashboard() {
 
     setSubmittingId(productId);
     try {
+      const writeContract = await getWriteContract();
       const overrides = await getGasOverrides();
-      const tx = await contract.transferOwnership(productId, formData.newOwner, overrides);
+      const tx = await writeContract.transferOwnership(productId, formData.newOwner, overrides);
       await tx.wait();
       toast.success(`Ownership transferred for Product #${productId}`);
       await loadDistributorData();

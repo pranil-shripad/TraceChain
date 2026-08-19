@@ -8,7 +8,7 @@ import { STATUS_LABELS, STATUS_COLORS, shortAddr } from "../../lib/trace/config"
 
 export function RetailerDashboard() {
   const { account } = useWallet();
-  const { contract, getProduct } = useSupplyChain();
+  const { contract, getProduct, getWriteContract } = useSupplyChain();
   const [activeTab, setActiveTab] = useState("pending");
   const [pendingProducts, setPendingProducts] = useState([]);
   const [deliveredProducts, setDeliveredProducts] = useState([]);
@@ -69,9 +69,10 @@ export function RetailerDashboard() {
 
     setSubmittingId(productId);
     try {
+      const writeContract = await getWriteContract();
       const overrides = await getGasOverrides();
       // Status 3 = Delivered
-      const tx = await contract.updateStatus(productId, 3, location, overrides);
+      const tx = await writeContract.updateStatus(productId, 3, location, overrides);
       await tx.wait();
       toast.success(`Product #${productId} marked as DELIVERED!`);
       await loadRetailerData();

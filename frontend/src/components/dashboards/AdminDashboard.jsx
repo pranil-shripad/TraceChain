@@ -37,35 +37,76 @@ export function AdminDashboard() {
     if (!contract) return;
     setRoleLoading(true);
     try {
-      const events = await contract.queryFilter("RoleGranted");
-      const holdersMap = new Map();
+      const mfgHash = await contract.MANUFACTURER_ROLE();
+      const distHash = await contract.DISTRIBUTOR_ROLE();
+      const retHash = await contract.RETAILER_ROLE();
 
-      for (const e of events) {
-        const r = e.args?.role || e.args?.[0];
-        const a = e.args?.account || e.args?.[1];
-        if (!r || !a) continue;
+      // Collect candidate addresses to check
+      const candidateMap = new Map();
 
-        let roleName = "UNKNOWN";
-        const mfgHash = await contract.MANUFACTURER_ROLE();
-        const distHash = await contract.DISTRIBUTOR_ROLE();
-        const retHash = await contract.RETAILER_ROLE();
-
-        if (r === mfgHash) roleName = "MANUFACTURER";
-        else if (r === distHash) roleName = "DISTRIBUTOR";
-        else if (r === retHash) roleName = "RETAILER";
-
-        if (roleName !== "UNKNOWN") {
-          const key = `${a.toLowerCase()}_${roleName}`;
-          holdersMap.set(key, {
-            address: a,
-            role: roleName,
-            roleBytes: r,
-            blockNumber: e.blockNumber,
-          });
+      // 1. Try querying on-chain events with fallback block ranges
+      let events = [];
+      try {
+        events = await contract.queryFilter("RoleGranted", 0);
+      } catch {
+        try {
+          events = await contract.queryFilter("RoleGranted", -50000);
+        } catch {
+          try {
+            events = await contract.queryFilter("RoleGranted", -10000);
+          } catch {
+            events = [];
+          }
         }
       }
 
-      setRoleHolders(Array.from(holdersMap.values()));
+      for (const e of events) {
+        const a = e.args?.account || e.args?.[1];
+        if (a) {
+          candidateMap.set(a.toLowerCase(), a);
+        }
+      }
+
+      // 2. Add addresses from JSONBin requests
+      try {
+        const reqs = await getRequests();
+        reqs.forEach((req) => {
+          if (req.walletAddress) {
+            candidateMap.set(req.walletAddress.toLowerCase(), req.walletAddress);
+          }
+        });
+      } catch {}
+
+      // 3. Add connected wallet address
+      if (account) {
+        candidateMap.set(account.toLowerCase(), account);
+      }
+
+      // 4. Verify live on-chain hasRole for each candidate address across all roles
+      const holdersList = [];
+      const rolesToCheck = [
+        { name: "MANUFACTURER", hash: mfgHash },
+        { name: "DISTRIBUTOR", hash: distHash },
+        { name: "RETAILER", hash: retHash },
+      ];
+
+      for (const addr of candidateMap.values()) {
+        for (const r of rolesToCheck) {
+          try {
+            const hasIt = await contract.hasRole(r.hash, addr);
+            if (hasIt) {
+              holdersList.push({
+                address: addr,
+                role: r.name,
+                roleBytes: r.hash,
+                blockNumber: "VERIFIED",
+              });
+            }
+          } catch {}
+        }
+      }
+
+      setRoleHolders(holdersList);
       setRoleLoading(false);
     } catch (err) {
       console.error("Error loading role holders:", err);

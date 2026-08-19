@@ -43,6 +43,7 @@ type WalletState = {
   wrongNetwork: boolean;
   connect: () => Promise<void>;
   disconnect: () => void;
+  switchAccount: () => Promise<void>;
   switchNetwork: () => Promise<void>;
   /** Signer-backed contract — requires a connected wallet. */
   getWriteContract: () => Promise<Contract>;
@@ -154,6 +155,28 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const disconnect = useCallback(() => setAccount(null), []);
 
+  const switchAccount = useCallback(async () => {
+    const eth = getEthereum();
+    if (!eth) return;
+    try {
+      await eth.request({
+        method: "wallet_requestPermissions",
+        params: [{ eth_accounts: {} }],
+      });
+      const accounts = (await eth.request({
+        method: "eth_accounts",
+      })) as string[];
+      if (accounts?.[0]) {
+        setAccount(accounts[0]);
+        toast.success("ACCOUNT SWITCHED", {
+          description: `Connected to ${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
+        });
+      }
+    } catch {
+      setAccount(null);
+    }
+  }, []);
+
   const switchNetwork = useCallback(async () => {
     const eth = getEthereum();
     if (!eth) return;
@@ -195,6 +218,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       wrongNetwork: !!account && chainId !== null && chainId !== CHAIN_ID,
       connect,
       disconnect,
+      switchAccount,
       switchNetwork,
       getWriteContract,
     }),
@@ -205,6 +229,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       hasWallet,
       connect,
       disconnect,
+      switchAccount,
       switchNetwork,
       getWriteContract,
     ],

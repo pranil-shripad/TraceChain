@@ -11,6 +11,7 @@ export function useWallet() {
     connectWallet: wallet.connect,
     connect: wallet.connect,
     disconnect: wallet.disconnect,
+    switchAccount: wallet.switchAccount,
     switchNetwork: wallet.switchNetwork,
     getWriteContract: wallet.getWriteContract,
   };

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/brutal";
 import { CHAIN_NAME, shortAddr } from "@/lib/trace/config";
 import { useWallet } from "@/lib/trace/wallet";
+import { useRole } from "@/hooks/useRole";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const LINKS = [
@@ -64,6 +65,14 @@ function WalletButton() {
 
 export function Nav() {
   const [open, setOpen] = useState(false);
+  const { isAdmin } = useRole();
+
+  const visibleLinks = LINKS.filter((link) => {
+    if (link.to === "/admin") {
+      return isAdmin;
+    }
+    return true;
+  });
 
   return (
     <header className="sticky top-0 z-40 border-b-[4px] border-ink bg-paper">
@@ -78,7 +87,7 @@ export function Nav() {
         </Link>
 
         <nav className="hidden items-center gap-2 lg:flex" aria-label="Main">
-          {LINKS.map(({ to, label, icon: Icon }) => (
+          {visibleLinks.map(({ to, label, icon: Icon }) => (
             <Link
               key={to}
               to={to}
@@ -115,7 +124,7 @@ export function Nav() {
           className="grid gap-2 border-t-[4px] border-ink bg-surface p-4 lg:hidden"
           aria-label="Mobile"
         >
-          {LINKS.map(({ to, label, icon: Icon }) => (
+          {visibleLinks.map(({ to, label, icon: Icon }) => (
             <Link
               key={to}
               to={to}
